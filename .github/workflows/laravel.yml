@@ -128,7 +128,7 @@ jobs:
       # ------------------------------------------
       - name: ✅ Verify Build
         run: |
-          php artisan route:list --compact
+          php artisan route:list --path=api
           echo "✅ Build verification passed!"
 
   # ============================================
