@@ -41,7 +41,7 @@ jobs:
       # Step 1: Download the repository code
       # ------------------------------------------
       - name: 📥 Checkout Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       # ------------------------------------------
       # Step 2: Setup PHP 8.2 with required extensions
