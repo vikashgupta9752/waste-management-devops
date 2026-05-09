@@ -132,33 +132,46 @@ class SmartCityService
     }
 
     /**
-     * Simulate a high-load scenario.
+     * Simulate scenarios for demo/presentation purposes.
      */
-    public function triggerSimulation($type = 'heavy_waste')
+    public function triggerSimulation($type = 'demo')
     {
         SimulationLog::create([
             'event' => $type,
             'details' => ['triggered_at' => Carbon::now()->toDateTimeString()]
         ]);
 
-        if ($type === 'heavy_waste') {
-            // Fill all bins to 90-100%
-            Bin::where('status', 'active')->update(['fill_level' => rand(90, 100), 'status' => 'full']);
+        $citizens = User::where('role', 'citizen')->pluck('id')->toArray();
+        $categories = \App\Models\WasteCategory::pluck('id')->toArray();
 
-            // Create 10 random waste requests
-            $citizens = User::where('role', 'citizen')->pluck('id')->toArray();
-            $categories = \App\Models\WasteCategory::pluck('id')->toArray();
-            
-            for ($i = 0; $i < 10; $i++) {
+        // Guard: if no citizens or categories exist, bail early
+        if (empty($citizens) || empty($categories)) {
+            return true;
+        }
+
+        if ($type === 'demo') {
+            // Create 5 sample waste requests across different statuses
+            $statuses = ['pending', 'assigned', 'collecting', 'collected', 'disposed'];
+            $addresses = [
+                'Sector 5, Smart City', 'Green Avenue, Block A',
+                'MG Road, Central Area', 'Eco Park Lane, Zone 3',
+                'Tech Hub, Industrial District'
+            ];
+
+            for ($i = 0; $i < 5; $i++) {
                 WasteRequest::create([
                     'user_id' => $citizens[array_rand($citizens)],
                     'waste_category_id' => $categories[array_rand($categories)],
-                    'address' => 'Simulation Street ' . rand(1, 100),
-                    'latitude' => 23.8103 + (rand(-50, 50) / 1000),
-                    'longitude' => 90.4125 + (rand(-50, 50) / 1000),
-                    'status' => 'pending'
+                    'address' => $addresses[$i] ?? 'Demo Street ' . ($i + 1),
+                    'latitude' => 23.8103 + (rand(-30, 30) / 1000),
+                    'longitude' => 90.4125 + (rand(-30, 30) / 1000),
+                    'status' => $statuses[$i],
                 ]);
             }
+
+            // Fill a few bins to varying levels for dashboard variety
+            Bin::where('status', 'active')->inRandomOrder()->limit(3)
+                ->update(['fill_level' => rand(60, 95)]);
         }
 
         return true;

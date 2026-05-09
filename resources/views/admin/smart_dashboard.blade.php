@@ -56,9 +56,6 @@
         <p class="text-muted">Intelligent AI-driven waste management & prediction</p>
     </div>
     <div class="d-flex gap-2">
-        <button class="btn btn-warning btn-simulation shadow-sm" onclick="triggerSimulation('heavy_waste')">
-            <i class="fa-solid fa-bolt me-2"></i> Heavy Waste Simulation
-        </button>
         <button class="btn btn-primary btn-simulation shadow-sm" onclick="triggerSimulation('demo')">
             <i class="fa-solid fa-play me-2"></i> Run Demo Mode
         </button>
