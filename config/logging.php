@@ -127,6 +127,28 @@ return [
             'path' => storage_path('logs/laravel.log'),
         ],
 
+        /*
+        |--------------------------------------------------------------------------
+        | Loki Channel (DevOps — Promtail Collection)
+        |--------------------------------------------------------------------------
+        |
+        | This channel writes structured daily logs that Promtail collects
+        | and ships to Grafana Loki for centralized log viewing.
+        |
+        | To enable: set LOG_STACK=daily,loki in your .env file
+        | View logs: Grafana → Explore → Loki data source
+        |
+        | This is purely additive and does NOT affect existing logging.
+        |
+        */
+        'loki' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/loki-laravel.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'days' => 30,
+            'replace_placeholders' => true,
+        ],
+
     ],
 
 ];

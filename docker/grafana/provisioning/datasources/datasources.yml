@@ -1,0 +1,38 @@
+# =============================================================================
+# Grafana Data Sources — Auto-Provisioning
+# =============================================================================
+# This file automatically configures Grafana to connect to:
+# 1. Prometheus — for metrics and performance data
+# 2. Loki — for centralized log viewing
+#
+# NO MANUAL SETUP NEEDED: When Grafana starts, it reads this file
+# and creates the data sources automatically.
+# =============================================================================
+
+apiVersion: 1
+
+datasources:
+  # ------------------------------------------
+  # Prometheus Data Source
+  # ------------------------------------------
+  # Used for: CPU, RAM, request rates, response times, uptime
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090        # Docker service name
+    isDefault: true                    # Default data source for new panels
+    editable: true
+    jsonData:
+      timeInterval: '15s'             # Matches Prometheus scrape interval
+
+  # ------------------------------------------
+  # Loki Data Source
+  # ------------------------------------------
+  # Used for: Application logs, error tracking, request logs
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100              # Docker service name
+    editable: true
+    jsonData:
+      maxLines: 1000                   # Max log lines per query

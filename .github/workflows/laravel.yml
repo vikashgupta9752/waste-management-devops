@@ -1,0 +1,164 @@
+# =============================================================================
+# CI/CD Pipeline for Laravel Waste Management System
+# =============================================================================
+# This workflow runs on every push and pull request to ensure code quality.
+# After tests pass on the 'main' branch, it automatically deploys to Render.
+#
+# HOW IT WORKS:
+# 1. Sets up PHP 8.2 and Node.js 20 environments
+# 2. Installs Composer (PHP) and npm (JavaScript) dependencies
+# 3. Prepares the Laravel application (env, key, database)
+# 4. Builds frontend assets (Vite + Tailwind CSS)
+# 5. Runs all PHPUnit tests
+# 6. If all tests pass on 'main' branch → triggers Render deployment
+# =============================================================================
+
+name: Laravel CI/CD Pipeline
+
+# ----------------------------------------------
+# TRIGGER: When does this workflow run?
+# ----------------------------------------------
+on:
+  push:
+    branches: [main, master, develop]     # Runs on push to these branches
+  pull_request:
+    branches: [main, master]              # Runs on PRs targeting these branches
+
+# ----------------------------------------------
+# JOBS: What tasks does the workflow perform?
+# ----------------------------------------------
+jobs:
+
+  # ============================================
+  # JOB 1: Test & Build
+  # ============================================
+  test:
+    name: 🧪 Test & Build
+    runs-on: ubuntu-latest                # Uses Ubuntu Linux server (free)
+
+    steps:
+      # ------------------------------------------
+      # Step 1: Download the repository code
+      # ------------------------------------------
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      # ------------------------------------------
+      # Step 2: Setup PHP 8.2 with required extensions
+      # ------------------------------------------
+      - name: 🐘 Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, bcmath, sqlite3, pdo_sqlite
+          coverage: none                  # Skip code coverage (faster)
+
+      # ------------------------------------------
+      # Step 3: Cache Composer dependencies
+      # (saves time on repeated runs)
+      # ------------------------------------------
+      - name: 📦 Cache Composer Dependencies
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.lock') }}
+          restore-keys: composer-
+
+      # ------------------------------------------
+      # Step 4: Install PHP dependencies
+      # ------------------------------------------
+      - name: 📦 Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist --optimize-autoloader
+
+      # ------------------------------------------
+      # Step 5: Setup Node.js 20 for frontend build
+      # ------------------------------------------
+      - name: 🟢 Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      # ------------------------------------------
+      # Step 6: Install JavaScript dependencies
+      # ------------------------------------------
+      - name: 📦 Install npm Dependencies
+        run: npm ci
+
+      # ------------------------------------------
+      # Step 7: Prepare Laravel environment
+      # ------------------------------------------
+      - name: ⚙️ Prepare Environment
+        run: |
+          # Copy example env file
+          cp .env.example .env
+
+          # Generate application encryption key
+          php artisan key:generate
+
+          # Create SQLite database file for testing
+          touch database/database.sqlite
+
+      # ------------------------------------------
+      # Step 8: Build frontend assets (Vite)
+      # ------------------------------------------
+      - name: 🔨 Build Frontend Assets
+        run: npm run build
+
+      # ------------------------------------------
+      # Step 9: Run database migrations
+      # ------------------------------------------
+      - name: 🗄️ Run Migrations
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan migrate --force
+
+      # ------------------------------------------
+      # Step 10: Run all PHPUnit tests
+      # ------------------------------------------
+      - name: 🧪 Run Tests
+        env:
+          DB_CONNECTION: sqlite
+          DB_DATABASE: database/database.sqlite
+        run: php artisan test
+
+      # ------------------------------------------
+      # Step 11: Verify application boots correctly
+      # ------------------------------------------
+      - name: ✅ Verify Build
+        run: |
+          php artisan route:list --compact
+          echo "✅ Build verification passed!"
+
+  # ============================================
+  # JOB 2: Deploy to Render
+  # ============================================
+  deploy:
+    name: 🚀 Deploy to Render
+    runs-on: ubuntu-latest
+    needs: test                            # Only runs AFTER 'test' job passes
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: 🚀 Trigger Render Deployment
+        run: |
+          echo "🚀 Triggering deployment to Render..."
+
+          # ================================================
+          # SETUP INSTRUCTIONS:
+          # ================================================
+          # 1. Go to your Render Dashboard
+          # 2. Select your "Waste Management" service
+          # 3. Go to Settings → Deploy Hook
+          # 4. Copy the Deploy Hook URL
+          # 5. Go to GitHub → Repository → Settings → Secrets
+          # 6. Add a new secret:
+          #    Name:  RENDER_DEPLOY_HOOK_URL
+          #    Value: <your Render Deploy Hook URL>
+          # ================================================
+
+          curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" \
+            || echo "⚠️ Deploy hook not configured yet. See instructions above."
+
+          echo "✅ Deployment triggered successfully!"

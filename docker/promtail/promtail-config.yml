@@ -1,0 +1,105 @@
+# =============================================================================
+# Promtail Configuration
+# =============================================================================
+# Promtail is the log-shipping agent that reads log files and sends
+# them to Loki for centralized storage and querying.
+#
+# WHAT IT MONITORS:
+# 1. Laravel application logs (errors, warnings, user actions)
+# 2. Nginx access logs (HTTP requests, response codes)
+# 3. Nginx error logs (server errors, misconfigurations)
+#
+# HOW IT WORKS:
+# Promtail → reads log files → adds labels → sends to Loki → viewable in Grafana
+# =============================================================================
+
+server:
+  http_listen_port: 9080                # Promtail status page
+  grpc_listen_port: 0                   # Disable gRPC
+
+# ------------------------------------------
+# Where to send logs
+# ------------------------------------------
+clients:
+  - url: http://loki:3100/loki/api/v1/push   # Loki's push API endpoint
+
+# ------------------------------------------
+# Positions file — remembers where it left off
+# ------------------------------------------
+positions:
+  filename: /tmp/positions.yaml         # Tracks read position per file
+
+# =============================================================================
+# Scrape Configs — What log files to read
+# =============================================================================
+scrape_configs:
+
+  # ------------------------------------------
+  # 1. Laravel Application Logs
+  # ------------------------------------------
+  # Reads: storage/logs/*.log
+  # Tracks: Errors, warnings, user activities, driver actions
+  - job_name: laravel
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          app: waste-management
+          service: laravel
+          __path__: /var/log/laravel/*.log     # Mounted from storage/logs/
+
+    # Pipeline: parse Laravel log format
+    pipeline_stages:
+      # Match Laravel log format: [2024-01-15 10:30:45] local.ERROR: message
+      - multiline:
+          firstline: '^\[\d{4}-\d{2}-\d{2}'   # New log entry starts with [date
+          max_wait_time: 3s
+          max_lines: 128
+
+      - regex:
+          expression: '^\[(?P<timestamp>\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2})\]\s(?P<env>\w+)\.(?P<level>\w+):\s(?P<message>.*)'
+
+      - labels:
+          level:                               # Extract log level as label
+          env:                                 # Extract environment as label
+
+      - timestamp:
+          source: timestamp
+          format: '2006-01-02 15:04:05'        # Go time format
+
+  # ------------------------------------------
+  # 2. Nginx Access Logs
+  # ------------------------------------------
+  # Reads: /var/log/nginx/access.log
+  # Tracks: HTTP requests, response codes, client IPs
+  - job_name: nginx-access
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          app: waste-management
+          service: nginx
+          log_type: access
+          __path__: /var/log/nginx/access.log
+
+    pipeline_stages:
+      - regex:
+          expression: '^(?P<remote_addr>\S+)\s-\s(?P<remote_user>\S+)\s\[(?P<time_local>[^\]]+)\]\s"(?P<request>[^"]+)"\s(?P<status>\d+)\s(?P<body_bytes_sent>\d+)\s"(?P<http_referer>[^"]*)"\s"(?P<http_user_agent>[^"]*)"'
+
+      - labels:
+          status:                              # HTTP status code as label
+
+  # ------------------------------------------
+  # 3. Nginx Error Logs
+  # ------------------------------------------
+  # Reads: /var/log/nginx/error.log
+  # Tracks: Server errors, configuration issues
+  - job_name: nginx-error
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          app: waste-management
+          service: nginx
+          log_type: error
+          __path__: /var/log/nginx/error.log

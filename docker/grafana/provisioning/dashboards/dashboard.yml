@@ -1,0 +1,19 @@
+# =============================================================================
+# Grafana Dashboard Provisioning
+# =============================================================================
+# Tells Grafana where to find pre-built dashboard JSON files.
+# Dashboards are loaded automatically when Grafana starts.
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: 'Waste Management Dashboards'
+    orgId: 1
+    folder: 'Waste Management'        # Dashboard folder name in Grafana UI
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /var/lib/grafana/dashboards    # Where JSON dashboard files are
+      foldersFromFilesStructure: false

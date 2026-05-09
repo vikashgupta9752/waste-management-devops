@@ -1,0 +1,89 @@
+# =============================================================================
+# Development Dockerfile for Laravel Waste Management System
+# =============================================================================
+# This Dockerfile is used ONLY for local development with Docker Compose.
+# The production Dockerfile (./Dockerfile) remains unchanged.
+#
+# WHAT THIS DOES:
+# - Sets up PHP 8.2 with FPM (FastCGI Process Manager)
+# - Installs all required PHP extensions
+# - Installs Composer for dependency management
+# - Source code is mounted as a volume (not copied) for live reloading
+#
+# USAGE:
+#   This file is referenced in docker-compose.yml as the build context
+#   for the 'app' service. You don't run this directly.
+# =============================================================================
+
+FROM php:8.2-fpm-alpine
+
+# ------------------------------------------
+# Install system dependencies and PHP extensions
+# ------------------------------------------
+RUN apk add --no-cache \
+    # Build tools
+    bash \
+    curl \
+    git \
+    zip \
+    unzip \
+    # SQLite support
+    sqlite \
+    sqlite-dev \
+    # PostgreSQL support (optional, for future use)
+    libpq-dev \
+    # PHP extension build dependencies
+    oniguruma-dev \
+    libxml2-dev \
+    # For image processing (if needed)
+    freetype-dev \
+    libjpeg-turbo-dev \
+    libpng-dev \
+    # Redis extension build dependency
+    $PHPIZE_DEPS \
+    && docker-php-ext-install \
+        pdo_mysql \
+        pdo_sqlite \
+        pdo_pgsql \
+        mbstring \
+        xml \
+        bcmath \
+        opcache \
+    # Install Redis PHP extension
+    && pecl install redis \
+    && docker-php-ext-enable redis \
+    # Cleanup
+    && rm -rf /var/cache/apk/* /tmp/*
+
+# ------------------------------------------
+# Install Composer (PHP package manager)
+# ------------------------------------------
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# ------------------------------------------
+# Configure PHP for development
+# ------------------------------------------
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+# Development PHP settings
+RUN echo "upload_max_filesize=10M" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "post_max_size=12M" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "memory_limit=256M" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "max_execution_time=60" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "display_errors=On" >> /usr/local/etc/php/conf.d/99-dev.ini && \
+    echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/99-dev.ini
+
+# ------------------------------------------
+# Set working directory
+# ------------------------------------------
+WORKDIR /var/www/html
+
+# ------------------------------------------
+# Expose PHP-FPM port
+# ------------------------------------------
+EXPOSE 9000
+
+# ------------------------------------------
+# Start PHP-FPM
+# ------------------------------------------
+CMD ["php-fpm"]

@@ -1,0 +1,49 @@
+# =============================================================================
+# Loki Configuration
+# =============================================================================
+# Loki is a log aggregation system (like Prometheus, but for logs).
+# It receives logs from Promtail and stores them for querying via Grafana.
+#
+# This is a simple single-node configuration suitable for development
+# and small-scale deployments.
+# =============================================================================
+
+auth_enabled: false                     # No authentication (dev mode)
+
+server:
+  http_listen_port: 3100                # Loki API port
+  grpc_listen_port: 9096                # Internal gRPC port
+
+common:
+  path_prefix: /loki                    # Base directory for all data
+  storage:
+    filesystem:
+      chunks_directory: /loki/chunks    # Where log data is stored
+      rules_directory: /loki/rules      # Where alerting rules are stored
+  replication_factor: 1                 # Single node = 1 replica
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory                   # In-memory ring for single node
+
+schema_config:
+  configs:
+    - from: 2020-10-24                  # Schema start date
+      store: tsdb                       # Time-series database for index
+      object_store: filesystem          # Store data on local filesystem
+      schema: v13                       # Latest schema version
+      index:
+        prefix: index_                  # Index file prefix
+        period: 24h                     # New index every 24 hours
+
+limits_config:
+  reject_old_samples: true              # Reject logs with old timestamps
+  reject_old_samples_max_age: 168h      # Max age: 7 days
+  ingestion_rate_mb: 4                  # Max ingestion rate: 4 MB/s
+  ingestion_burst_size_mb: 6            # Burst allowance: 6 MB
+  max_entries_limit_per_query: 5000     # Max entries per query
+
+# Retention: auto-delete logs older than 30 days
+table_manager:
+  retention_deletes_enabled: true
+  retention_period: 720h               # 30 days

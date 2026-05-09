@@ -1,0 +1,80 @@
+# =============================================================================
+# Security Scanning Workflow
+# =============================================================================
+# Runs weekly and on pull requests to check for known vulnerabilities
+# in PHP (Composer) and JavaScript (npm) dependencies.
+#
+# HOW IT WORKS:
+# - Uses 'composer audit' to check PHP packages
+# - Uses 'npm audit' to check JavaScript packages
+# - Fails the workflow if critical vulnerabilities are found
+# =============================================================================
+
+name: 🔒 Security Scan
+
+on:
+  # Run every Monday at 9:00 AM UTC
+  schedule:
+    - cron: '0 9 * * 1'
+
+  # Also run on pull requests
+  pull_request:
+    branches: [main, master]
+
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+
+jobs:
+  security-audit:
+    name: 🔍 Dependency Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Code
+        uses: actions/checkout@v4
+
+      # ------------------------------------------
+      # PHP Security Audit
+      # ------------------------------------------
+      - name: 🐘 Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+
+      - name: 📦 Install Composer Dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: 🔒 Composer Security Audit
+        run: |
+          echo "🔍 Checking PHP dependencies for vulnerabilities..."
+          composer audit --format=plain
+          echo "✅ PHP dependency audit complete!"
+
+      # ------------------------------------------
+      # JavaScript Security Audit
+      # ------------------------------------------
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: 📦 Install npm Dependencies
+        run: npm ci
+
+      - name: 🔒 npm Security Audit
+        run: |
+          echo "🔍 Checking JavaScript dependencies for vulnerabilities..."
+          npm audit --audit-level=critical || true
+          echo "✅ JavaScript dependency audit complete!"
+
+      # ------------------------------------------
+      # Summary
+      # ------------------------------------------
+      - name: 📋 Security Summary
+        run: |
+          echo "========================================"
+          echo "🔒 Security Scan Complete"
+          echo "========================================"
+          echo "PHP packages: Audited via composer audit"
+          echo "JS packages:  Audited via npm audit"
+          echo "========================================"

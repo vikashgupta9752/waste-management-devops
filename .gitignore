@@ -22,3 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# ==============================================
+# DevOps — Ignore generated/sensitive files
+# ==============================================
+/storage/backups/*
+!/storage/backups/.gitkeep
+docker/nginx/ssl/*.pem
+docker/nginx/ssl/*.key
+docker/nginx/ssl/*.crt
+

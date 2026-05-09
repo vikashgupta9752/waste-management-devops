@@ -1,0 +1,80 @@
+# =============================================================================
+# GitHub Dependabot Configuration
+# =============================================================================
+# Dependabot automatically checks your dependencies for known security
+# vulnerabilities and creates pull requests to update them.
+#
+# HOW IT WORKS:
+# - Scans PHP (Composer), JavaScript (npm), Docker, and GitHub Actions
+# - Runs weekly on Monday mornings
+# - Opens PRs with security fixes automatically
+# - You review and merge the PRs
+#
+# No code changes needed — GitHub enables this automatically when this
+# file exists in the repository.
+# =============================================================================
+
+version: 2
+
+updates:
+  # ------------------------------------------
+  # PHP Dependencies (Composer)
+  # ------------------------------------------
+  - package-ecosystem: "composer"
+    directory: "/"                    # Root of the repository
+    schedule:
+      interval: "weekly"             # Check every week
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"       # IST timezone
+    open-pull-requests-limit: 5      # Max 5 PRs at a time
+    labels:
+      - "dependencies"
+      - "php"
+    commit-message:
+      prefix: "chore(composer):"
+
+  # ------------------------------------------
+  # JavaScript Dependencies (npm)
+  # ------------------------------------------
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "javascript"
+    commit-message:
+      prefix: "chore(npm):"
+
+  # ------------------------------------------
+  # Docker Base Images
+  # ------------------------------------------
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "docker"
+    commit-message:
+      prefix: "chore(docker):"
+
+  # ------------------------------------------
+  # GitHub Actions
+  # ------------------------------------------
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "chore(actions):"

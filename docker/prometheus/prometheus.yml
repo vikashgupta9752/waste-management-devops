@@ -1,0 +1,80 @@
+# =============================================================================
+# Prometheus Configuration
+# =============================================================================
+# Prometheus scrapes metrics from various targets at regular intervals.
+# These metrics are then visualized in Grafana dashboards.
+#
+# WHAT IS SCRAPED:
+# - Prometheus itself (self-monitoring)
+# - Nginx stub_status (request counts, connections)
+# - Laravel app health endpoint
+#
+# HOW TO ADD MORE TARGETS:
+# Add a new job under 'scrape_configs' with the target address.
+# =============================================================================
+
+global:
+  # How often Prometheus collects metrics from targets
+  scrape_interval: 15s          # Every 15 seconds
+  # How often alerting rules are evaluated
+  evaluation_interval: 15s
+  # Labels added to all collected metrics
+  external_labels:
+    project: 'waste-management'
+    environment: 'development'
+
+# =============================================================================
+# Scrape Configurations — What to monitor
+# =============================================================================
+scrape_configs:
+
+  # ------------------------------------------
+  # 1. Prometheus Self-Monitoring
+  # ------------------------------------------
+  # Prometheus monitors its own health
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+        labels:
+          service: 'prometheus'
+
+  # ------------------------------------------
+  # 2. Nginx Metrics
+  # ------------------------------------------
+  # Collects: active connections, requests/sec, response counts
+  # Requires: stub_status enabled in nginx config
+  - job_name: 'nginx'
+    metrics_path: /nginx_status
+    static_configs:
+      - targets: ['nginx:80']
+        labels:
+          service: 'nginx'
+
+  # ------------------------------------------
+  # 3. Laravel Application Health
+  # ------------------------------------------
+  # Checks if the Laravel app is responding
+  # Uses Laravel's built-in /up health endpoint
+  - job_name: 'laravel-health'
+    metrics_path: /up
+    scheme: http
+    static_configs:
+      - targets: ['nginx:80']
+        labels:
+          service: 'laravel'
+          type: 'health'
+
+  # ------------------------------------------
+  # 4. Laravel Application Metrics
+  # ------------------------------------------
+  # Custom metrics endpoint (read-only)
+  # Exposes: uptime, cache stats, queue size
+  - job_name: 'laravel-metrics'
+    metrics_path: /api/devops/metrics
+    scheme: http
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['nginx:80']
+        labels:
+          service: 'laravel'
+          type: 'metrics'
