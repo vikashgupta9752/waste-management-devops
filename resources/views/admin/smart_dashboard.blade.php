@@ -6,6 +6,7 @@
     <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
     <a href="{{ route('admin.smart-dashboard') }}" class="active"><i class="fa-solid fa-city"></i> Smart Dashboard</a>
     <a href="{{ route('admin.requests') }}"><i class="fa-solid fa-list"></i> Requests</a>
+    <a href="{{ route('admin.users') }}"><i class="fa-solid fa-users-gear"></i> User Management</a>
 @endsection
 
 @section('head')

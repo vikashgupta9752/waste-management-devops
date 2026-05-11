@@ -40,6 +40,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/requests', [AdminController::class, 'requests'])->name('requests');
         Route::post('/assign', [AdminController::class, 'assign'])->name('assign');
         Route::get('/export-reports', [AdminController::class, 'exportReports'])->name('export-reports');
+        Route::get('/users', [AdminController::class, 'users'])->name('users');
+        Route::patch('/users/{user}/role', [AdminController::class, 'updateRole'])->name('users.update-role');
         Route::get('/complaints', [ComplaintController::class, 'adminIndex'])->name('complaints');
         Route::patch('/complaints/{complaint}', [ComplaintController::class, 'update'])->name('complaints.update');
     });

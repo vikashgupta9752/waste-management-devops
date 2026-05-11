@@ -2,9 +2,9 @@
 
 @section('title', 'Admin Dashboard')
 
-@section('sidebar')
     <a href="{{ route('admin.dashboard') }}" class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
     <a href="{{ route('admin.smart-dashboard') }}"><i class="fa-solid fa-city"></i> Smart Dashboard</a>
+    <a href="{{ route('admin.users') }}"><i class="fa-solid fa-users-gear"></i> User Management</a>
 @endsection
 
 @section('content')

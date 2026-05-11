@@ -57,6 +57,54 @@ class AdminController extends Controller
         return back()->with('success', 'Request assigned to driver successfully!');
     }
 
+    public function users(Request $request)
+    {
+        $query = User::query();
+
+        // Search by name or email
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        // Filter by role
+        if ($request->filled('role') && in_array($request->role, ['admin', 'driver', 'citizen'])) {
+            $query->where('role', $request->role);
+        }
+
+        $users = $query->orderBy('created_at', 'desc')->paginate(15)->withQueryString();
+
+        $roleCounts = [
+            'total' => User::count(),
+            'admin' => User::where('role', 'admin')->count(),
+            'driver' => User::where('role', 'driver')->count(),
+            'citizen' => User::where('role', 'citizen')->count(),
+        ];
+
+        return view('admin.users', compact('users', 'roleCounts'));
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $request->validate([
+            'role' => ['required', 'in:admin,driver,citizen'],
+        ]);
+
+        // Prevent admin from demoting themselves
+        if ($user->id === auth()->id() && $request->role !== 'admin') {
+            return back()->with('error', 'You cannot change your own role.');
+        }
+
+        $oldRole = $user->role;
+        $user->role = $request->role;
+        $user->save();
+
+        return back()->with('success', "{$user->name}'s role changed from {$oldRole} to {$request->role}.");
+    }
+
     public function exportReports()
     {
         $headers = [
