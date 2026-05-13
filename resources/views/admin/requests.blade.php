@@ -77,8 +77,24 @@
         </table>
     </div>
 
-    <div class="mt-4">
+    <div class="mt-4 d-flex justify-content-center">
         {{ $requests->links() }}
     </div>
 </div>
+
+<style>
+    .table th {
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.05em;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(26, 188, 156, 0.05);
+    }
+    .badge {
+        font-weight: 500;
+        padding: 0.5em 0.8em;
+    }
+</style>
 @endsection

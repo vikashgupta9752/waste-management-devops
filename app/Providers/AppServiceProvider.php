@@ -20,6 +20,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Pagination\Paginator::useBootstrapFive();
+
         // Force HTTPS in production (Render/Vercel terminate SSL at the proxy)
         if (app()->environment('production')) {
             URL::forceScheme('https');

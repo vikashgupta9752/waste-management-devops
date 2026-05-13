@@ -141,7 +141,7 @@
     });
 
     // Live Operational Map
-    const map = L.map('liveMap').setView([23.8103, 90.4125], 13);
+    const map = L.map('liveMap').setView([20.5937, 78.9629], 5);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
         attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
     }).addTo(map);

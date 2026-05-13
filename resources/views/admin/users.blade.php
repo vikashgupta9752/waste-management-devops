@@ -146,7 +146,7 @@
 
     {{-- Pagination --}}
     @if($users->hasPages())
-    <div class="d-flex justify-content-center mt-3">
+    <div class="mt-4 d-flex justify-content-center">
         {{ $users->links() }}
     </div>
     @endif

@@ -203,13 +203,13 @@
 <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps.key') }}&libraries=visualization"></script>
 <script>
     let map;
-    let gridRectangles = [];
+    let heatmap;
     let driverMarkers = {};
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
-            center: { lat: 23.8103, lng: 90.4125 },
-            zoom: 13,
+            center: { lat: 20.5937, lng: 78.9629 },
+            zoom: 5,
             disableDefaultUI: false,
             styles: [
                 { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#e9e9e9" }, { "lightness": 17 }] },
@@ -242,14 +242,22 @@
     async function loadHeatmap() {
         const response = await fetch(`/api/heatmap-data`);
         const data = await response.json();
-        gridRectangles.forEach(rect => rect.setMap(null));
-        gridRectangles = [];
-        data.forEach(cell => {
-            const rect = new google.maps.Rectangle({
-                strokeColor: cell.color, strokeOpacity: 0.8, strokeWeight: 1,
-                fillColor: cell.color, fillOpacity: 0.35, map: map, bounds: cell.bounds
-            });
-            gridRectangles.push(rect);
+        
+        if (heatmap) heatmap.setMap(null);
+        
+        const heatmapPoints = data.map(cell => {
+            return {
+                location: new google.maps.LatLng(cell.lat, cell.lng),
+                weight: cell.count
+            };
+        });
+
+        heatmap = new google.maps.visualization.HeatmapLayer({
+            data: heatmapPoints,
+            map: map,
+            radius: 30,
+            opacity: 0.7,
+            dissipating: true
         });
     }
 
