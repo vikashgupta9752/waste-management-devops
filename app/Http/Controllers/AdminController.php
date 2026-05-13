@@ -33,8 +33,54 @@ class AdminController extends Controller
     public function requests()
     {
         $requests = WasteRequest::with(['user', 'wasteCategory', 'assignment', 'schedule'])->latest()->paginate(15);
-        $drivers = User::where('role', 'driver')->get();
+        $drivers = User::where('role', 'driver')
+            ->with('location')
+            ->withCount(['assignments' => function($q) {
+                $q->where('status', 'assigned');
+            }])
+            ->get();
+
+        // For each request, calculate distances to all drivers
+        foreach ($requests as $req) {
+            if ($req->status == 'pending' && $req->latitude && $req->longitude) {
+                foreach ($drivers as $driver) {
+                    if ($driver->location) {
+                        $driver->distance = $this->calculateDistance(
+                            $req->latitude,
+                            $req->longitude,
+                            $driver->location->latitude,
+                            $driver->location->longitude
+                        );
+                    } else {
+                        $driver->distance = null;
+                    }
+                }
+                
+                // Attach a sorted copy of drivers to the request for the view
+                $req->nearest_drivers = $drivers->sortBy('distance')->values();
+            }
+        }
+
         return view('admin.requests', compact('requests', 'drivers'));
+    }
+
+    /**
+     * Haversine formula to calculate distance between two points in km.
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2)
+    {
+        $earthRadius = 6371; // km
+
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+             cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+             sin($dLon / 2) * sin($dLon / 2);
+        
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return $earthRadius * $c;
     }
 
     public function assign(Request $request)

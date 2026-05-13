@@ -5,6 +5,8 @@
 @section('sidebar')
     <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
     <a href="{{ route('admin.smart-dashboard') }}"><i class="fa-solid fa-city"></i> Smart Dashboard</a>
+    <a href="{{ route('admin.bins') }}"><i class="fa-solid fa-trash-can"></i> Smart Bins</a>
+    <a href="{{ route('admin.requests') }}"><i class="fa-solid fa-list"></i> Requests</a>
     <a href="{{ route('admin.users') }}" class="active"><i class="fa-solid fa-users-gear"></i> User Management</a>
 @endsection
 

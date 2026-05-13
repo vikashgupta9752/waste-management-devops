@@ -58,7 +58,7 @@ class SmartCityController extends Controller
     {
         $trends = WasteRequest::select(DB::raw('DATE(created_at) as date'), DB::raw('count(*) as count'))
             ->groupBy('date')
-            ->orderBy('date', 'desc')
+            ->orderBy('date', 'asc')
             ->limit(7)
             ->get();
 

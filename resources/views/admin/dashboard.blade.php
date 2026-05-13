@@ -5,6 +5,8 @@
 @section('sidebar')
     <a href="{{ route('admin.dashboard') }}" class="active"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
     <a href="{{ route('admin.smart-dashboard') }}"><i class="fa-solid fa-city"></i> Smart Dashboard</a>
+    <a href="{{ route('admin.bins') }}"><i class="fa-solid fa-trash-can"></i> Smart Bins</a>
+    <a href="{{ route('admin.requests') }}"><i class="fa-solid fa-list"></i> Requests</a>
     <a href="{{ route('admin.users') }}"><i class="fa-solid fa-users-gear"></i> User Management</a>
 @endsection
 
@@ -140,10 +142,21 @@
         options: { responsive: true, maintainAspectRatio: false }
     });
 
+    // India Bounds
+    const indiaBounds = L.latLngBounds([6.4626999, 68.1097], [35.513327, 97.395358]);
+
     // Live Operational Map
-    const map = L.map('liveMap').setView([20.5937, 78.9629], 5);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012'
+    const map = L.map('liveMap', {
+        center: [31.2559, 75.7051],
+        zoom: 13,
+        minZoom: 5,
+        maxBounds: indiaBounds,
+        maxBoundsViscosity: 1.0
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
     }).addTo(map);
 
     let driverMarkers = {};

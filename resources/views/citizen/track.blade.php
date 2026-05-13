@@ -21,9 +21,18 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-    const map = L.map('tracking-map').setView([0, 0], 15);
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri'
+    const indiaBounds = L.latLngBounds([6.4626999, 68.1097], [35.513327, 97.395358]);
+    const map = L.map('tracking-map', {
+        center: [31.2559, 75.7051],
+        zoom: 13,
+        minZoom: 5,
+        maxBounds: indiaBounds,
+        maxBoundsViscosity: 1.0
+    });
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors © CARTO',
+        subdomains: 'abcd',
+        maxZoom: 20
     }).addTo(map);
     
     let marker;

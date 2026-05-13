@@ -5,6 +5,7 @@
 @section('sidebar')
     <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-gauge"></i> Overview</a>
     <a href="{{ route('admin.smart-dashboard') }}" class="active"><i class="fa-solid fa-city"></i> Smart Dashboard</a>
+    <a href="{{ route('admin.bins') }}"><i class="fa-solid fa-trash-can"></i> Smart Bins</a>
     <a href="{{ route('admin.requests') }}"><i class="fa-solid fa-list"></i> Requests</a>
     <a href="{{ route('admin.users') }}"><i class="fa-solid fa-users-gear"></i> User Management</a>
 @endsection
@@ -153,8 +154,8 @@
         <div class="card glass-card">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h5><i class="fa-solid fa-chart-line me-2 text-primary"></i>AI Waste Prediction (Next 10 Days)</h5>
-                    <span class="badge bg-soft-primary text-primary">Predicted Volume: {{ $prediction }} units</span>
+                    <h5><i class="fa-solid fa-clock-rotate-left me-2 text-primary"></i>Waste Generation History (Last 7 Days)</h5>
+                    <span class="badge bg-soft-success text-success">Real-time Data</span>
                 </div>
                 <div style="height: 300px; position: relative;">
                     <canvas id="predictionChart"></canvas>
@@ -200,7 +201,7 @@
 @endsection
 
 @section('scripts')
-<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps.key') }}&libraries=visualization"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps.key') }}&libraries=visualization&language=en"></script>
 <script>
     let map;
     let heatmap;
@@ -208,8 +209,18 @@
 
     function initMap() {
         map = new google.maps.Map(document.getElementById('map'), {
-            center: { lat: 20.5937, lng: 78.9629 },
-            zoom: 5,
+            center: { lat: 31.2559, lng: 75.7051 },
+            zoom: 13,
+            minZoom: 5,
+            restriction: {
+                latLngBounds: {
+                    north: 35.5133,
+                    south: 6.4626,
+                    west: 68.1097,
+                    east: 97.3953
+                },
+                strictBounds: false
+            },
             disableDefaultUI: false,
             styles: [
                 { "featureType": "water", "elementType": "geometry", "stylers": [{ "color": "#e9e9e9" }, { "lightness": 17 }] },
@@ -278,26 +289,35 @@
     }
 
     async function loadAnalytics() {
-        const res = await fetch('/api/prediction-data');
-        const predData = await res.json();
+        const res = await fetch('/api/analytics-data');
+        const data = await res.json();
         
+        // History Chart
         new Chart(document.getElementById('predictionChart'), {
             type: 'line',
             data: {
-                labels: predData.map(p => p.prediction_date),
+                labels: data.trends.map(t => t.date),
                 datasets: [{
-                    label: 'Predicted Waste Load',
-                    data: predData.map(p => p.predicted_value),
-                    borderColor: '#667eea',
-                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    label: 'Waste Requests',
+                    data: data.trends.map(t => t.count),
+                    borderColor: '#1abc9c',
+                    backgroundColor: 'rgba(26, 188, 156, 0.1)',
                     fill: true, tension: 0.4
                 }]
             },
-            options: { responsive: true, maintainAspectRatio: false }
+            options: { 
+                responsive: true, 
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1 }
+                    }
+                }
+            }
         });
 
-        const res2 = await fetch('/api/analytics-data');
-        const data = await res2.json();
+        // Composition Chart
         new Chart(document.getElementById('compositionChart'), {
             type: 'doughnut',
             data: {

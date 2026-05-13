@@ -5,6 +5,7 @@
 @section('sidebar')
     <a href="{{ route('admin.dashboard') }}"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
     <a href="{{ route('admin.smart-dashboard') }}"><i class="fa-solid fa-city"></i> Smart Dashboard</a>
+    <a href="{{ route('admin.bins') }}"><i class="fa-solid fa-trash-can"></i> Smart Bins</a>
     <a href="{{ route('admin.requests') }}" class="active"><i class="fa-solid fa-list"></i> Requests</a>
     <a href="{{ route('admin.users') }}"><i class="fa-solid fa-users-gear"></i> User Management</a>
 @endsection
@@ -56,19 +57,31 @@
                     </td>
                     <td>
                         @if($req->status == 'pending')
-                        <form action="{{ route('admin.assign') }}" method="POST" class="d-flex">
+                        <form action="{{ route('admin.assign') }}" method="POST">
                             @csrf
                             <input type="hidden" name="waste_request_id" value="{{ $req->id }}">
-                            <select name="driver_id" class="form-select form-select-sm me-2" required>
-                                <option value="">Select Driver</option>
-                                @foreach($drivers as $driver)
-                                    <option value="{{ $driver->id }}">{{ $driver->name }}</option>
-                                @endforeach
-                            </select>
-                            <button type="submit" class="btn btn-sm btn-primary">Assign</button>
+                            <div class="input-group input-group-sm">
+                                <select name="driver_id" class="form-select" required>
+                                    <option value="">Select Driver</option>
+                                    @php
+                                        $displayDrivers = $req->nearest_drivers ?? $drivers;
+                                    @endphp
+                                    @foreach($displayDrivers as $index => $driver)
+                                        <option value="{{ $driver->id }}">
+                                            {{ $driver->name }} 
+                                            @if(isset($driver->distance))
+                                                ({{ number_format($driver->distance, 1) }} km away)
+                                            @endif
+                                            [{{ $driver->assignments_count > 0 ? 'Busy' : 'Available' }}]
+                                            @if($index === 0 && isset($driver->distance)) ★ Nearest @endif
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <button type="submit" class="btn btn-primary">Assign</button>
+                            </div>
                         </form>
                         @else
-                            <span class="text-muted small">Assigned</span>
+                            <span class="badge bg-light text-dark border"><i class="fa-solid fa-check me-1"></i> Assigned</span>
                         @endif
                     </td>
                 </tr>

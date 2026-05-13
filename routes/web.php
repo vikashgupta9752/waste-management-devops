@@ -44,6 +44,12 @@ Route::middleware('auth')->group(function () {
         Route::patch('/users/{user}/role', [AdminController::class, 'updateRole'])->name('users.update-role');
         Route::get('/complaints', [ComplaintController::class, 'adminIndex'])->name('complaints');
         Route::patch('/complaints/{complaint}', [ComplaintController::class, 'update'])->name('complaints.update');
+        
+        // Smart Bin Management
+        Route::get('/bins', [BinController::class, 'adminIndex'])->name('bins');
+        Route::post('/bins', [BinController::class, 'store'])->name('bins.store');
+        Route::patch('/bins/{bin}', [BinController::class, 'update'])->name('bins.update');
+        Route::delete('/bins/{bin}', [BinController::class, 'destroy'])->name('bins.destroy');
     });
 
     // Driver Routes

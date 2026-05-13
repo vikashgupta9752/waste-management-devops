@@ -51,4 +51,48 @@ class BinController extends Controller
 
         return response()->json(['success' => true, 'bin' => $bin]);
     }
+
+    public function adminIndex()
+    {
+        $bins = Bin::all();
+        return view('admin.bins.index', compact('bins'));
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'location_name' => 'required|string|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'fill_level' => 'required|integer|min:0|max:100',
+        ]);
+
+        $validated['status'] = $validated['fill_level'] >= 90 ? 'full' : 'active';
+
+        Bin::create($validated);
+
+        return back()->with('success', 'Smart Bin added successfully!');
+    }
+
+    public function update(Request $request, Bin $bin)
+    {
+        $validated = $request->validate([
+            'location_name' => 'required|string|max:255',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
+            'fill_level' => 'required|integer|min:0|max:100',
+        ]);
+
+        $validated['status'] = $validated['fill_level'] >= 90 ? 'full' : 'active';
+
+        $bin->update($validated);
+
+        return back()->with('success', 'Smart Bin updated successfully!');
+    }
+
+    public function destroy(Bin $bin)
+    {
+        $bin->delete();
+        return back()->with('success', 'Smart Bin deleted successfully!');
+    }
 }

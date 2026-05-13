@@ -244,10 +244,29 @@
                 // Show map for verification
                 mapDiv.style.display = 'block';
                 if (!map) {
-                    map = L.map('map').setView([lat, lng], 16);
-                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                        attribution: '&copy; OpenStreetMap contributors'
+                    const indiaBounds = L.latLngBounds([6.4626999, 68.1097], [35.513327, 97.395358]);
+                    map = L.map('map', {
+                        center: [lat, lng],
+                        zoom: 16,
+                        minZoom: 5,
+                        maxBounds: indiaBounds,
+                        maxBoundsViscosity: 1.0
+                    });
+                    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                        attribution: '© OpenStreetMap contributors © CARTO',
+                        subdomains: 'abcd',
+                        maxZoom: 20
                     }).addTo(map);
+
+                    // Add click handler to allow manual adjustments
+                    map.on('click', function(e) {
+                        const newLat = e.latlng.lat;
+                        const newLng = e.latlng.lng;
+                        latInput.value = newLat;
+                        lngInput.value = newLng;
+                        marker.setLatLng([newLat, newLng]);
+                        locationStatus.innerHTML = `<span class="text-success"><i class="fa-solid fa-circle-check"></i> Location Set: ${newLat.toFixed(4)}, ${newLng.toFixed(4)}</span>`;
+                    });
                 } else {
                     map.setView([lat, lng], 16);
                 }

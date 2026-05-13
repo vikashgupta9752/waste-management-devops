@@ -14,37 +14,37 @@ class BinSeeder extends Seeder
     {
         $bins = [
             [
-                'location_name' => 'Main Street Central',
-                'latitude' => 23.8103,
-                'longitude' => 90.4125,
+                'location_name' => 'LPU Main Gate',
+                'latitude' => 31.2559,
+                'longitude' => 75.7051,
                 'fill_level' => 45,
                 'status' => 'active'
             ],
             [
-                'location_name' => 'North Park Entrance',
-                'latitude' => 23.8203,
-                'longitude' => 90.4225,
+                'location_name' => 'Law Gate Phagwara',
+                'latitude' => 31.2480,
+                'longitude' => 75.7010,
                 'fill_level' => 85,
                 'status' => 'active'
             ],
             [
-                'location_name' => 'University Gate 1',
-                'latitude' => 23.8003,
-                'longitude' => 90.4025,
+                'location_name' => 'LPU Block 34',
+                'latitude' => 31.2580,
+                'longitude' => 75.7100,
                 'fill_level' => 10,
                 'status' => 'active'
             ],
             [
-                'location_name' => 'Shopping Mall South',
-                'latitude' => 23.8153,
-                'longitude' => 90.4155,
+                'location_name' => 'Phagwara Bus Stand',
+                'latitude' => 31.2220,
+                'longitude' => 75.7720,
                 'fill_level' => 60,
                 'status' => 'active'
             ],
             [
-                'location_name' => 'Residential Block B',
-                'latitude' => 23.8053,
-                'longitude' => 90.4085,
+                'location_name' => 'LPU Residential Area',
+                'latitude' => 31.2600,
+                'longitude' => 75.7150,
                 'fill_level' => 95,
                 'status' => 'full'
             ],
