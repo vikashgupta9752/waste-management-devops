@@ -19,6 +19,7 @@
   <a href="#-devops-features">⚙️ DevOps Features</a>
 </p>
 
+Linkdin Video Link: https://www.linkedin.com/posts/vikash-gupta43_laravel-webdevelopment-smartcity-ugcPost-7460338057750220800-Jueq/?utm_source=social_share_send&utm_medium=member_desktop_web&rcm=ACoAADa2rTwB3U867ze7lDHi-b5cQ1mkpEF0_74
 ---
 
 ## 📋 Table of Contents
