@@ -15,7 +15,7 @@
 #   for the 'app' service. You don't run this directly.
 # =============================================================================
 
-FROM php:8.2-fpm-alpine
+FROM php:8.5-fpm-alpine
 
 # ------------------------------------------
 # Install system dependencies and PHP extensions
